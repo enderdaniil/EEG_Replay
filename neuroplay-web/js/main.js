@@ -1072,41 +1072,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   const playbackSeek = document.getElementById("playbackSeek");
   const currentTimeDisplay = document.getElementById("currentTimeDisplay");
   const durationDisplay = document.getElementById("durationDisplay");
-  
   let isPlaybackMode = false;
-  
+
   btnPlaybackMode.addEventListener("click", () => {
     isPlaybackMode = !isPlaybackMode;
-    
+
+    const liveControls = document.getElementById("liveControls");
+    const playbackControls = document.getElementById("playbackControls");
+
     if (isPlaybackMode) {
       // Switch to playback mode
-      recordingSelector.style.display = "inline-block";
-      btnPlay.style.display = "inline-block";
-      btnPause.style.display = "inline-block";
-      btnStop.style.display = "inline-block";
-      playbackSpeed.style.display = "inline-block";
+      liveControls.style.display = "none";
+      playbackControls.style.display = "flex";
       playbackProgressContainer.style.display = "flex";
-      btnPlaybackMode.textContent = "📡 Режим LIVE";
-      
+      btnPlaybackMode.textContent = "📡 LIVE";
+      btnPlaybackMode.classList.add("btn-live");
+
       // Stop any live polling
       if (App.polling) {
         App.stopPolling();
       }
     } else {
       // Switch back to live mode
-      recordingSelector.style.display = "none";
-      btnPlay.style.display = "none";
-      btnPause.style.display = "none";
-      btnStop.style.display = "none";
-      playbackSpeed.style.display = "none";
+      liveControls.style.display = "flex";
+      playbackControls.style.display = "none";
       playbackProgressContainer.style.display = "none";
-      btnPlaybackMode.textContent = "📁 Режим записи";
-      
+      btnPlaybackMode.textContent = "📁 Запись";
+      btnPlaybackMode.classList.remove("btn-live");
+
       // Stop playback
       if (playbackManager) {
         playbackManager.stop();
       }
-      
+
       // Restart live polling if connected
       if (App.connection?.isConnected) {
         App.startPolling();
