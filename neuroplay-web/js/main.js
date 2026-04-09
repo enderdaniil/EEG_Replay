@@ -1052,4 +1052,135 @@ const App = {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => App.init());
+// Initialize playback manager after App is defined
+let playbackManager = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await App.init();
+  
+  // Initialize playback manager
+  playbackManager = new PlaybackManager(App);
+  
+  // Bind playback UI controls
+  const btnPlaybackMode = document.getElementById("btnPlaybackMode");
+  const recordingSelector = document.getElementById("recordingSelector");
+  const btnPlay = document.getElementById("btnPlay");
+  const btnPause = document.getElementById("btnPause");
+  const btnStop = document.getElementById("btnStop");
+  const playbackSpeed = document.getElementById("playbackSpeed");
+  const playbackProgressContainer = document.getElementById("playbackProgressContainer");
+  const playbackSeek = document.getElementById("playbackSeek");
+  const currentTimeDisplay = document.getElementById("currentTimeDisplay");
+  const durationDisplay = document.getElementById("durationDisplay");
+  
+  let isPlaybackMode = false;
+  
+  btnPlaybackMode.addEventListener("click", () => {
+    isPlaybackMode = !isPlaybackMode;
+    
+    if (isPlaybackMode) {
+      // Switch to playback mode
+      recordingSelector.style.display = "inline-block";
+      btnPlay.style.display = "inline-block";
+      btnPause.style.display = "inline-block";
+      btnStop.style.display = "inline-block";
+      playbackSpeed.style.display = "inline-block";
+      playbackProgressContainer.style.display = "flex";
+      btnPlaybackMode.textContent = "📡 Режим LIVE";
+      
+      // Stop any live polling
+      if (App.polling) {
+        App.stopPolling();
+      }
+    } else {
+      // Switch back to live mode
+      recordingSelector.style.display = "none";
+      btnPlay.style.display = "none";
+      btnPause.style.display = "none";
+      btnStop.style.display = "none";
+      playbackSpeed.style.display = "none";
+      playbackProgressContainer.style.display = "none";
+      btnPlaybackMode.textContent = "📁 Режим записи";
+      
+      // Stop playback
+      if (playbackManager) {
+        playbackManager.stop();
+      }
+      
+      // Restart live polling if connected
+      if (App.connection?.isConnected) {
+        App.startPolling();
+      }
+    }
+  });
+  
+  recordingSelector.addEventListener("change", async () => {
+    const filePath = recordingSelector.value;
+    if (!filePath) {
+      btnPlay.disabled = true;
+      btnPause.disabled = true;
+      btnStop.disabled = true;
+      return;
+    }
+    
+    const loaded = await playbackManager.loadFile(filePath);
+    if (loaded) {
+      btnPlay.disabled = false;
+      btnPause.disabled = true;
+      btnStop.disabled = true;
+      
+      // Update duration display
+      const duration = playbackManager.getDuration();
+      durationDisplay.textContent = formatTime(duration);
+      playbackSeek.max = duration;
+      playbackSeek.value = 0;
+      currentTimeDisplay.textContent = "0:00";
+    }
+  });
+  
+  btnPlay.addEventListener("click", () => {
+    if (!playbackManager.playbackData) return;
+    
+    playbackManager.play();
+    btnPlay.disabled = true;
+    btnPause.disabled = false;
+    btnStop.disabled = false;
+  });
+  
+  btnPause.addEventListener("click", () => {
+    playbackManager.pause();
+    btnPlay.disabled = false;
+    btnPlay.textContent = "▶️ Resume";
+    btnPause.disabled = true;
+  });
+  
+  btnStop.addEventListener("click", () => {
+    playbackManager.stop();
+    btnPlay.disabled = false;
+    btnPlay.textContent = "▶️ Play";
+    btnPause.disabled = true;
+    btnStop.disabled = true;
+    
+    // Reset displays
+    playbackSeek.value = 0;
+    currentTimeDisplay.textContent = "0:00";
+  });
+  
+  playbackSpeed.addEventListener("change", () => {
+    playbackManager.setSpeed(parseFloat(playbackSpeed.value));
+  });
+  
+  // Seek functionality
+  playbackSeek.addEventListener("input", () => {
+    const time = parseFloat(playbackSeek.value);
+    playbackManager.seek(time);
+    currentTimeDisplay.textContent = formatTime(time);
+  });
+  
+  // Helper function to format time
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+});
