@@ -365,3 +365,78 @@ body { font-family: Segoe UI, sans-serif; background: var(--bg-primary); color: 
 @media (max-width: 1100px) {
   .main-content { grid-template-columns: 1fr; }
 }
+
+/* Playback Progress Bar */
+.playback-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+.playback-progress .progress-time {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 45px;
+  text-align: center;
+  font-family: monospace;
+}
+
+.playback-progress #playbackSeek {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.playback-progress #playbackSeek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.playback-progress #playbackSeek::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.playback-progress #playbackSeek::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* Header layout adjustments for playback controls */
+.header-right {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+#recordingSelector {
+  min-width: 280px;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}

@@ -25,6 +25,26 @@
     </div>
 
     <div class="header-right">
+      <!-- Playback Controls -->
+      <button class="btn btn-secondary" id="btnPlaybackMode">📁 Режим записи</button>
+      <select id="recordingSelector" class="select" style="display:none;">
+        <option value="">Выберите запись...</option>
+        <option value="data/1_ХВН_2026.04.03-13.59.20.556_playback.json">1_ХВН (190 сек)</option>
+        <option value="data/2_БАО_2026.04.03-14.06.39.869_playback.json">2_БАО (190 сек)</option>
+        <option value="data/3_ФЕС_2026.04.03-14.12.02.827_playback.json">3_ФЕС (244 сек)</option>
+      </select>
+      <button class="btn btn-success" id="btnPlay" disabled>▶️ Play</button>
+      <button class="btn btn-warning" id="btnPause" disabled>⏸️ Pause</button>
+      <button class="btn btn-danger" id="btnStop" disabled>⏹️ Stop</button>
+      <label style="color:var(--text-secondary);font-size:12px;">Speed:</label>
+      <select id="playbackSpeed" class="select" style="width:80px;">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="2">2x</option>
+        <option value="4">4x</option>
+      </select>
+      
+      <!-- Live Connection Controls -->
       <button class="btn btn-secondary" id="btnTestConnection">🔌 Тест</button>
       <button class="btn btn-secondary" id="btnStartSearch">🔎 Поиск</button>
       <button class="btn btn-secondary" id="btnListDevices">📋 Устройства</button>
@@ -231,6 +251,13 @@
 
   <div id="toastContainer" class="toast-container"></div>
 
+  <!-- Playback progress bar -->
+  <div class="playback-progress" id="playbackProgressContainer" style="display:none;">
+    <span class="progress-time" id="currentTimeDisplay">0:00</span>
+    <input type="range" id="playbackSeek" min="0" max="100" value="0" step="0.1" />
+    <span class="progress-time" id="durationDisplay">0:00</span>
+  </div>
+
 <script src="js/api.js"></script>
   <script src="js/averaging.js"></script>
   <script src="js/normalization.js"></script>
@@ -246,6 +273,7 @@
   <script src="js/headmap.js"></script>
   <script src="js/recorder.js"></script>
   <script src="js/tabs.js"></script>
+  <script src="js/playback.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
