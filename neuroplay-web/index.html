@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NeuroPlayPro — EEG Visualizer</title>
+  <title>NeuroPlayPro — EEG Visualizer & Playback</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+  <!-- Header with Logo and Status -->
   <header class="header">
     <div class="header-left">
       <div class="logo">
@@ -25,57 +26,50 @@
     </div>
 
     <div class="header-right">
-      <!-- Playback Controls -->
-      <button class="btn btn-secondary" id="btnPlaybackMode">📁 Режим записи</button>
-      <select id="recordingSelector" class="select" style="display:none;">
-        <option value="">Выберите запись...</option>
-        <option value="data/1_ХВН_2026.04.03-13.59.20.556_playback.json">1_ХВН (190 сек)</option>
-        <option value="data/2_БАО_2026.04.03-14.06.39.869_playback.json">2_БАО (190 сек)</option>
-        <option value="data/3_ФЕС_2026.04.03-14.12.02.827_playback.json">3_ФЕС (244 сек)</option>
-      </select>
-      <button class="btn btn-success" id="btnPlay" disabled>▶️ Play</button>
-      <button class="btn btn-warning" id="btnPause" disabled>⏸️ Pause</button>
-      <button class="btn btn-danger" id="btnStop" disabled>⏹️ Stop</button>
-      <label style="color:var(--text-secondary);font-size:12px;">Speed:</label>
-      <select id="playbackSpeed" class="select" style="width:80px;">
-        <option value="0.5">0.5x</option>
-        <option value="1" selected>1x</option>
-        <option value="2">2x</option>
-        <option value="4">4x</option>
-      </select>
+      <!-- Mode Toggle Button -->
+      <button class="btn btn-mode" id="btnPlaybackMode" title="Переключить режим">📁 Запись</button>
       
-      <!-- Live Connection Controls -->
-      <button class="btn btn-secondary" id="btnTestConnection">🔌 Тест</button>
-      <button class="btn btn-secondary" id="btnStartSearch">🔎 Поиск</button>
-      <button class="btn btn-secondary" id="btnListDevices">📋 Устройства</button>
-      <input id="deviceSnInput" class="select" placeholder="SN (опционально)" />
-      <input id="deviceIdInput" class="select" placeholder="ID (опционально)" />
-      <select id="deviceSelector" class="select"></select>
-      <button class="btn btn-primary" id="btnConnect">📡 Подключить</button>
-      <button class="btn btn-success" id="btnStartDevice" disabled>▶️ Запуск</button>
-      <button class="btn btn-warning" id="btnStopDevice" disabled>⏹️ Стоп</button>
-      <button class="btn btn-record" id="btnRecord" disabled>🔴 Запись</button>
-      <button class="btn btn-secondary" id="btnPauseRecord" disabled>⏸️ Пауза</button>
+      <!-- Live Connection Controls (visible by default) -->
+      <div class="control-group live-controls" id="liveControls">
+        <button class="btn btn-secondary" id="btnTestConnection" title="Проверить соединение">🔌 Тест</button>
+        <button class="btn btn-secondary" id="btnStartSearch" title="Начать поиск устройств">🔎 Поиск</button>
+        <button class="btn btn-secondary" id="btnListDevices" title="Список устройств">📋 Устройства</button>
+        <input id="deviceSnInput" class="select input-small" placeholder="SN" />
+        <input id="deviceIdInput" class="select input-small" placeholder="ID" />
+        <select id="deviceSelector" class="select"></select>
+        <button class="btn btn-primary" id="btnConnect" title="Подключиться к устройству">📡 Подключить</button>
+        <button class="btn btn-success" id="btnStartDevice" disabled title="Запустить устройство">▶️ Запуск</button>
+        <button class="btn btn-warning" id="btnStopDevice" disabled title="Остановить устройство">⏹️ Стоп</button>
+        <button class="btn btn-record" id="btnRecord" disabled title="Начать запись">🔴 Запись</button>
+        <button class="btn btn-secondary" id="btnPauseRecord" disabled title="Пауза записи">⏸️ Пауза</button>
+      </div>
+      
+      <!-- Playback Controls (hidden by default) -->
+      <div class="control-group playback-controls" id="playbackControls" style="display:none;">
+        <label class="control-label">📂 Запись:</label>
+        <select id="recordingSelector" class="select select-large">
+          <option value="">Выберите запись...</option>
+          <option value="data/1_ХВН_2026.04.03-13.59.20.556_playback.json">1_ХВН (190 сек)</option>
+          <option value="data/2_БАО_2026.04.03-14.06.39.869_playback.json">2_БАО (190 сек)</option>
+          <option value="data/3_ФЕС_2026.04.03-14.12.02.827_playback.json">3_ФЕС (244 сек)</option>
+        </select>
+        <button class="btn btn-success" id="btnPlay" disabled title="Воспроизвести">▶️ Play</button>
+        <button class="btn btn-warning" id="btnPause" disabled title="Пауза">⏸️ Pause</button>
+        <button class="btn btn-danger" id="btnStop" disabled title="Стоп">⏹️ Stop</button>
+        <label class="control-label">⚡ Скорость:</label>
+        <select id="playbackSpeed" class="select">
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1x</option>
+          <option value="2">2x</option>
+          <option value="4">4x</option>
+        </select>
+      </div>
     </div>
   </header>
 
-  <nav class="main-tabs">
-    <button class="tab-btn active" data-tab="individual">Индивидуальные</button>
-    <button class="tab-btn" data-tab="pair">Попарное</button>
-    <button class="tab-btn" data-tab="hemisphere">Полушария</button>
-    <button class="tab-btn" data-tab="global">Глобальное</button>
-  </nav>
-
-  <nav class="sub-tabs">
-    <button class="sub-tab-btn active" data-subtab="rhythms">Ритмы</button>
-    <button class="sub-tab-btn" data-subtab="spectrum">Спектр</button>
-    <button class="sub-tab-btn" data-subtab="peak">Пиковая частота</button>
-    <button class="sub-tab-btn" data-subtab="connectivity">Связность</button>
-    <button class="sub-tab-btn" data-subtab="entropy">Энтропия</button>
-    <button class="sub-tab-btn" data-subtab="statistics">Статистика</button>
-  </nav>
-
+  <!-- Main Content Area -->
   <main class="main-content">
+    <!-- Left Column: HeadMap, Statistics, Markers -->
     <section class="content-left">
       <div class="headmap-container">
         <svg id="headMap" viewBox="0 0 400 500" class="headmap-svg">
@@ -116,7 +110,7 @@
       </div>
 
       <div class="statistics-panel">
-        <h3>Статистика <span class="stats-mode-tabs">
+        <h3 class="panel-title">Статистика <span class="stats-mode-tabs">
           <button class="stats-mode-btn active" data-statsmode="individual">Индивид.</button>
           <button class="stats-mode-btn" data-statsmode="pair">Парное</button>
           <button class="stats-mode-btn" data-statsmode="hemisphere">Полуш.</button>
@@ -126,38 +120,39 @@
         <div id="statsCharts"></div>
       </div>
 
-        <section id="tab-markers" class="tab-panel">
-          <div class="panel-head">
-            <h2>Динамические маркеры</h2>
-            <p>История TAR, BR и FA за последние 60 секунд</p>
-          </div>
+      <section id="tab-markers" class="tab-panel markers-panel">
+        <div class="panel-head">
+          <h2>Динамические маркеры</h2>
+          <p>История TAR, BR и FA за последние 60 секунд</p>
+        </div>
 
-          <div class="cards">
-            <article class="card">
-              <h3>TAR (Theta/Alpha)</h3>
-              <p id="tarValue">—</p>
-            </article>
-            <article class="card">
-              <h3>BR (Beta/Alpha)</h3>
-              <p id="brValue">—</p>
-            </article>
-            <article class="card">
-              <h3>Frontal Asymmetry (Fp2-Fp1)</h3>
-              <p id="faFrontalValue">—</p>
-            </article>
-            <article class="card">
-              <h3>T Asymmetry (T3-T4)</h3>
-              <p id="faTValue">—</p>
-            </article>
-            <article class="card">
-              <h3>Cortical Asymmetry (O1-O2)</h3>
-              <p id="faCorticalValue">—</p>
-            </article>
-            <div id="markersCharts"></div>
-          </div>
-        </section>
+        <div class="cards">
+          <article class="card marker-card">
+            <h3>TAR (Theta/Alpha)</h3>
+            <p id="tarValue">—</p>
+          </article>
+          <article class="card marker-card">
+            <h3>BR (Beta/Alpha)</h3>
+            <p id="brValue">—</p>
+          </article>
+          <article class="card marker-card">
+            <h3>Frontal Asymmetry (Fp2-Fp1)</h3>
+            <p id="faFrontalValue">—</p>
+          </article>
+          <article class="card marker-card">
+            <h3>T Asymmetry (T3-T4)</h3>
+            <p id="faTValue">—</p>
+          </article>
+          <article class="card marker-card">
+            <h3>Cortical Asymmetry (O1-O2)</h3>
+            <p id="faCorticalValue">—</p>
+          </article>
+          <div id="markersCharts"></div>
+        </div>
+      </section>
     </section>
 
+    <!-- Right Column: Matrix, Quality, Asynchrony, Device Info -->
     <aside class="content-right">
       <div class="matrix-container">
         <div class="matrix-header">
@@ -190,13 +185,13 @@
       </div>
 
       <div class="quality-panel">
-        <h3>Качество сигнала</h3>
+        <h3 class="panel-title">Качество сигнала</h3>
         <div class="quality-grid" id="qualityGrid"></div>
       </div>
 
-      <!-- Asynchrony Panel from spec -->
+      <!-- Asynchrony Panel -->
       <div class="asynchrony-panel" id="asynchrony-panel">
-        <h3>🧩 Асимметрия полушарий</h3>
+        <h3 class="panel-title">🧩 Асимметрия полушарий</h3>
         <div class="asymmetry-display">
           <div class="asymmetry-value">--</div>
           <div class="asymmetry-arrow">↔</div>
@@ -229,12 +224,13 @@
       </div>
 
       <div class="device-info-panel">
-        <h3>Информация об устройстве</h3>
+        <h3 class="panel-title">Информация об устройстве</h3>
         <div class="info-grid" id="deviceInfo"></div>
       </div>
     </aside>
   </main>
 
+  <!-- Footer with Status Information -->
   <footer class="footer">
     <div class="footer-left">
       <span>Частота: <strong id="sampleRate">--</strong></span>
@@ -249,15 +245,17 @@
     </div>
   </footer>
 
+  <!-- Toast Notifications Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- Playback progress bar -->
+  <!-- Playback Progress Bar (visible only in playback mode) -->
   <div class="playback-progress" id="playbackProgressContainer" style="display:none;">
     <span class="progress-time" id="currentTimeDisplay">0:00</span>
     <input type="range" id="playbackSeek" min="0" max="100" value="0" step="0.1" />
     <span class="progress-time" id="durationDisplay">0:00</span>
   </div>
 
+<!-- Scripts -->
 <script src="js/api.js"></script>
   <script src="js/averaging.js"></script>
   <script src="js/normalization.js"></script>
