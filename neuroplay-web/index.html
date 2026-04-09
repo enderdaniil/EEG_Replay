@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroPlayPro — EEG Visualizer</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">🧠</span>
+        <span class="logo-text">NeuroPlayPro</span>
+      </div>
+      <div class="version" id="versionBadge">v--</div>
+    </div>
+
+    <div class="header-center">
+      <div class="connection-status" id="connectionStatus">
+        <span class="status-indicator"></span>
+        <span class="status-text">Отключено</span>
+      </div>
+      <div class="session-timer" id="sessionTimer">00:00:00</div>
+    </div>
+
+    <div class="header-right">
+      <button class="btn btn-secondary" id="btnTestConnection">🔌 Тест</button>
+      <button class="btn btn-secondary" id="btnStartSearch">🔎 Поиск</button>
+      <button class="btn btn-secondary" id="btnListDevices">📋 Устройства</button>
+      <input id="deviceSnInput" class="select" placeholder="SN (опционально)" />
+      <input id="deviceIdInput" class="select" placeholder="ID (опционально)" />
+      <select id="deviceSelector" class="select"></select>
+      <button class="btn btn-primary" id="btnConnect">📡 Подключить</button>
+      <button class="btn btn-success" id="btnStartDevice" disabled>▶️ Запуск</button>
+      <button class="btn btn-warning" id="btnStopDevice" disabled>⏹️ Стоп</button>
+      <button class="btn btn-record" id="btnRecord" disabled>🔴 Запись</button>
+      <button class="btn btn-secondary" id="btnPauseRecord" disabled>⏸️ Пауза</button>
+    </div>
+  </header>
+
+  <nav class="main-tabs">
+    <button class="tab-btn active" data-tab="individual">Индивидуальные</button>
+    <button class="tab-btn" data-tab="pair">Попарное</button>
+    <button class="tab-btn" data-tab="hemisphere">Полушария</button>
+    <button class="tab-btn" data-tab="global">Глобальное</button>
+  </nav>
+
+  <nav class="sub-tabs">
+    <button class="sub-tab-btn active" data-subtab="rhythms">Ритмы</button>
+    <button class="sub-tab-btn" data-subtab="spectrum">Спектр</button>
+    <button class="sub-tab-btn" data-subtab="peak">Пиковая частота</button>
+    <button class="sub-tab-btn" data-subtab="connectivity">Связность</button>
+    <button class="sub-tab-btn" data-subtab="entropy">Энтропия</button>
+    <button class="sub-tab-btn" data-subtab="statistics">Статистика</button>
+  </nav>
+
+  <main class="main-content">
+    <section class="content-left">
+      <div class="headmap-container">
+        <svg id="headMap" viewBox="0 0 400 500" class="headmap-svg">
+          <ellipse cx="200" cy="250" rx="180" ry="220" class="head-outline"></ellipse>
+          <ellipse cx="200" cy="180" rx="15" ry="20" class="nose"></ellipse>
+          <circle cx="140" cy="200" r="12" class="ear-left"></circle>
+          <circle cx="260" cy="200" r="12" class="ear-right"></circle>
+
+          <g id="overlayLayer"></g>
+          <g id="channelMarkers"></g>
+          <g id="connectionLines"></g>
+        </svg>
+
+        <div class="bci-indicators">
+          <div class="bci-indicator">
+            <div class="bci-label">🧘 Медитация</div>
+            <div class="bci-value" id="meditationValue">0%</div>
+            <div class="bci-bar"><div class="bci-fill" id="meditationBar"></div></div>
+          </div>
+          <div class="bci-indicator">
+            <div class="bci-label">🎯 Концентрация</div>
+            <div class="bci-value" id="concentrationValue">0%</div>
+            <div class="bci-bar"><div class="bci-fill" id="concentrationBar"></div></div>
+          </div>
+          <div class="bci-indicator">
+            <div class="bci-label">🧠 Attention</div>
+            <div class="bci-value" id="attentionValue">0</div>
+          </div>
+          <div class="bci-indicator">
+            <div class="bci-label">⚡ SMR</div>
+            <div class="bci-value" id="smrValue">0</div>
+          </div>
+          <div class="bci-indicator">
+            <div class="bci-label">🧩 Biosignal State</div>
+            <div class="bci-value" id="biosignalStateValue">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="statistics-panel">
+        <h3>Статистика <span class="stats-mode-tabs">
+          <button class="stats-mode-btn active" data-statsmode="individual">Индивид.</button>
+          <button class="stats-mode-btn" data-statsmode="pair">Парное</button>
+          <button class="stats-mode-btn" data-statsmode="hemisphere">Полуш.</button>
+          <button class="stats-mode-btn" data-statsmode="global">Глоб.</button>
+        </span></h3>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div id="statsCharts"></div>
+      </div>
+
+        <section id="tab-markers" class="tab-panel">
+          <div class="panel-head">
+            <h2>Динамические маркеры</h2>
+            <p>История TAR, BR и FA за последние 60 секунд</p>
+          </div>
+
+          <div class="cards">
+            <article class="card">
+              <h3>TAR (Theta/Alpha)</h3>
+              <p id="tarValue">—</p>
+            </article>
+            <article class="card">
+              <h3>BR (Beta/Alpha)</h3>
+              <p id="brValue">—</p>
+            </article>
+            <article class="card">
+              <h3>Frontal Asymmetry (Fp2-Fp1)</h3>
+              <p id="faFrontalValue">—</p>
+            </article>
+            <article class="card">
+              <h3>T Asymmetry (T3-T4)</h3>
+              <p id="faTValue">—</p>
+            </article>
+            <article class="card">
+              <h3>Cortical Asymmetry (O1-O2)</h3>
+              <p id="faCorticalValue">—</p>
+            </article>
+            <div id="markersCharts"></div>
+          </div>
+        </section>
+    </section>
+
+    <aside class="content-right">
+      <div class="matrix-container">
+        <div class="matrix-header">
+          <h3>Матрица корреляций 6×6</h3>
+          <select id="bandSelector">
+            <option value="delta">Delta</option>
+            <option value="theta">Theta</option>
+            <option value="alpha" selected>Alpha</option>
+            <option value="beta">Beta</option>
+            <option value="gamma">Gamma</option>
+          </select>
+          <button class="btn btn-small" id="exportMatrix">📥 CSV</button>
+        </div>
+        <div class="matrix-wrapper">
+          <table class="correlation-matrix">
+            <thead>
+              <tr>
+                <th></th>
+                <th>O1</th>
+                <th>T3</th>
+                <th>Fp1</th>
+                <th>Fp2</th>
+                <th>T4</th>
+                <th>O2</th>
+              </tr>
+            </thead>
+            <tbody id="matrixBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="quality-panel">
+        <h3>Качество сигнала</h3>
+        <div class="quality-grid" id="qualityGrid"></div>
+      </div>
+
+      <!-- Asynchrony Panel from spec -->
+      <div class="asynchrony-panel" id="asynchrony-panel">
+        <h3>🧩 Асимметрия полушарий</h3>
+        <div class="asymmetry-display">
+          <div class="asymmetry-value">--</div>
+          <div class="asymmetry-arrow">↔</div>
+          <div class="asymmetry-label">Баланс</div>
+          <div class="asymmetry-desc">Нет данных</div>
+        </div>
+        <canvas class="asymmetry-chart" id="chart-asynchrony" width="100%" height="80"></canvas>
+        <div class="asymmetry-by-rhythm">
+          <div class="rhythm-item">
+            <span class="rhythm-label" style="color: var(--delta)">Δ Delta</span>
+            <span class="rhythm-value" id="ai-delta">--</span>
+          </div>
+          <div class="rhythm-item">
+            <span class="rhythm-label" style="color: var(--theta)">Θ Theta</span>
+            <span class="rhythm-value" id="ai-theta">--</span>
+          </div>
+          <div class="rhythm-item">
+            <span class="rhythm-label" style="color: var(--alpha)">α Alpha</span>
+            <span class="rhythm-value" id="ai-alpha">--</span>
+          </div>
+          <div class="rhythm-item">
+            <span class="rhythm-label" style="color: var(--beta)">β Beta</span>
+            <span class="rhythm-value" id="ai-beta">--</span>
+          </div>
+          <div class="rhythm-item">
+            <span class="rhythm-label" style="color: var(--gamma)">γ Gamma</span>
+            <span class="rhythm-value" id="ai-gamma">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="device-info-panel">
+        <h3>Информация об устройстве</h3>
+        <div class="info-grid" id="deviceInfo"></div>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">
+      <span>Частота: <strong id="sampleRate">--</strong></span>
+      <span>Каналы: <strong id="channelCount">--</strong></span>
+      <span>Запись: <strong id="recordDuration">00:00:00</strong></span>
+    </div>
+    <div class="footer-center">
+      <span id="lastUpdate">Обновление: --:--:--</span>
+    </div>
+    <div class="footer-right">
+      <span>API: <strong id="apiStatus">--</strong></span>
+    </div>
+  </footer>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+<script src="js/api.js"></script>
+  <script src="js/averaging.js"></script>
+  <script src="js/normalization.js"></script>
+  <script src="js/correlation.js"></script>
+  <script src="js/statistics.js"></script>
+  <script src="js/entropy.js"></script>
+  <script src="js/metrics-charts.js"></script>
+  <script src="js/realtime-chart.js"></script>
+  <script src="js/distribution-plot.js"></script>
+  <script src="js/asynchrony.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/connection.js"></script>
+  <script src="js/headmap.js"></script>
+  <script src="js/recorder.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
